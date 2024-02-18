@@ -1,4 +1,4 @@
-use std::process::Stdio;
+use std::{io::Read, process::Stdio};
 
 use anyhow::{Context, Result};
 
@@ -15,7 +15,7 @@ fn main() -> Result<()> {
         .args(command_args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
+        .spawn()
         .with_context(|| {
             format!(
                 "Tried to run '{}' with arguments {:?}",
@@ -23,14 +23,17 @@ fn main() -> Result<()> {
             )
         })?;
     
-    if output.status.success() {
-        let std_out = std::str::from_utf8(&output.stdout)?;
-        print!("{std_out}");
-        let std_err = std::str::from_utf8(&output.stderr)?;
-        print!("{std_err}");
-    } else {
-        std::process::exit(1);
-    }
+    output.stdout.map(|mut stdout| {
+        let mut buf = String::new();
+        stdout.read_to_string(&mut buf).unwrap();
+        print!("{}", buf);
+    });
+    output.stderr.map(|mut stderr| {
+        let mut buf = String::new();
+        stderr.read_to_string(&mut buf).unwrap();
+        eprint!("{}", buf);
+    });
+
 
     Ok(())
 }
