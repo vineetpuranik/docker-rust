@@ -1,5 +1,3 @@
-use std::{io::Read, process::Stdio};
-
 use anyhow::{Context, Result};
 
 // Usage: your_docker.sh run <image> <command> <arg1> <arg2> ...
@@ -13,8 +11,6 @@ fn main() -> Result<()> {
     let command_args = &args[4..];
     let output = std::process::Command::new(command)
         .args(command_args)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
         .output()
         .with_context(|| {
             format!(
@@ -23,6 +19,15 @@ fn main() -> Result<()> {
             )
         })?;
     
+    
+    //Wire up stdout to parent process
+    let std_out = std::str::from_utf8(&output.stdout)?;
+    print!("{}", std_out);
+
+    //Wire up stderr to parent process    
+    let std_err = std::str::from_utf8(&output.stderr)?;
+    print!("{}", std_err);
+
     //Wait for the child process to exit and check the exit status
     let exit_code = output.status.code();
 
@@ -30,7 +35,7 @@ fn main() -> Result<()> {
         Some(code) => std::process::exit(code),
         None => eprint!("No exit code returned")
     }
-    
+
     Ok(())
 
 }
