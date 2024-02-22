@@ -15,7 +15,7 @@ fn main() -> Result<()> {
         .args(command_args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .spawn()
+        .output()
         .with_context(|| {
             format!(
                 "Tried to run '{}' with arguments {:?}",
@@ -23,17 +23,14 @@ fn main() -> Result<()> {
             )
         })?;
     
-    output.stdout.map(|mut stdout| {
-        let mut buf = String::new();
-        stdout.read_to_string(&mut buf).unwrap();
-        print!("{}", buf);
-    });
-    output.stderr.map(|mut stderr| {
-        let mut buf = String::new();
-        stderr.read_to_string(&mut buf).unwrap();
-        eprint!("{}", buf);
-    });
+    //Wait for the child process to exit and check the exit status
+    let exit_code = output.status.code();
 
-
+    match exit_code {
+        Some(code) => std::process::exit(code),
+        None => eprint!("No exit code returned")
+    }
+    
     Ok(())
+
 }
