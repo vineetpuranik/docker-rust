@@ -26,7 +26,7 @@ fn main() -> Result<()> {
 
     //Wire up stderr to parent process    
     let std_err = std::str::from_utf8(&output.stderr)?;
-    print!("{}", std_err);
+    eprint!("{}", std_err);
 
     //Wait for the child process to exit and check the exit status
     let exit_code = output.status.code();
