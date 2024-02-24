@@ -3,6 +3,8 @@ use std::{fs};
 use std::os::unix::fs::chroot;
 
 
+const ISOLATED_PATH: &str = "/temp";
+
 // Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
 fn main() -> Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -10,15 +12,12 @@ fn main() -> Result<()> {
 
     // Uncomment this block to pass the first stage!
 
-    // create an empty temporary directory
-    // create an empty dev null in this directory
-    fs::create_dir_all("/temp/dev/null")?;
+    // create an empty temporary directory based on the isolated path
+    // create an empty dev/null directory in our isolated path
+    let create_dir_path = format!("{}{}", ISOLATED_PATH, "/dev/null");
+    fs::create_dir_all(create_dir_path)?;
     
-    //perform chroot operation
-    chroot("/temp")?;
     
-    //change the current working directory
-    std::env::set_current_dir("/temp")?;
     
     // chroot into the directory while executing the command and also copy over the binary
     let args: Vec<_> = std::env::args().collect();
@@ -26,7 +25,14 @@ fn main() -> Result<()> {
     let command_args = &args[4..];
 
     //copy binary to current working directory
-    fs::copy(command, "/temp").context("Failed to copy")?;
+    fs::copy(command, format!("{}{}", ISOLATED_PATH, command)).context("Failed to copy");
+
+    //create an empty file named null in
+    //perform chroot operation
+    chroot(ISOLATED_PATH)?;
+    
+    //change the current working directory
+    std::env::set_current_dir(ISOLATED_PATH)?;
 
     let output = std::process::Command::new(command)
         .args(command_args)
