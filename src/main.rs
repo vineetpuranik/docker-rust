@@ -1,5 +1,5 @@
 use anyhow::{Context, Ok, Result};
-use std::{fs, path::Path};
+use std::{fs};
 use std::os::unix::fs::chroot;
 
 
@@ -26,8 +26,7 @@ fn main() -> Result<()> {
     let command_args = &args[4..];
 
     //copy binary to current working directory
-    let copy_destination = "/temp".to_owned() + command.strip_prefix("/").unwrap();
-    fs::copy(command, &copy_destination).context("Failed to copy")?;
+    fs::copy(command, "/temp").context("Failed to copy")?;
 
     let output = std::process::Command::new(command)
         .args(command_args)
