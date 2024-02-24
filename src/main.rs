@@ -26,7 +26,7 @@ fn main() -> Result<()> {
     let command_args = &args[4..];
 
     //copy binary to current working directory
-    let copy_destination = "/temp" + command.strip_prefix("/").unwrap();
+    let copy_destination = "/temp".to_owned() + command.strip_prefix("/").unwrap();
     fs::copy(command, copy_destination).context("Failed to copy")?;
 
     let output = std::process::Command::new(command)
