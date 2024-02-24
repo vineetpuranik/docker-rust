@@ -1,14 +1,34 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Ok, Result};
+use std::{fs, path::Path};
+use std::os::unix::fs;
 
-// Usage: your_docker.sh run <image> <command> <arg1> <arg2> ...
+
+// Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
 fn main() -> Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
 
     // Uncomment this block to pass the first stage!
+
+    // create an empty temporary directory
+    // create an empty dev null in this directory
+    fs::create_dir_all("/temp/dev/null")?;
+    
+    //perform chroot operation
+    fs::chroot("/temp")?;
+    
+    //change the current working directory
+    std::env::set_current_dir("/temp");
+    
+    // chroot into the directory while executing the command and also copy over the binary
     let args: Vec<_> = std::env::args().collect();
     let command = &args[3];
     let command_args = &args[4..];
+
+    //copy binary to current working directory
+    let copy_destination = "/temp" + command.strip_prefix("/").unwrap();
+    fs::copy(command, copy_destination).context("Failed to copy")?;
+
     let output = std::process::Command::new(command)
         .args(command_args)
         .output()
@@ -35,7 +55,7 @@ fn main() -> Result<()> {
         Some(code) => std::process::exit(code),
         None => eprint!("No exit code returned")
     }
-
+    
     Ok(())
 
 }
