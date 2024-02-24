@@ -18,7 +18,7 @@ fn main() -> Result<()> {
     chroot("/temp")?;
     
     //change the current working directory
-    std::env::set_current_dir("/temp");
+    std::env::set_current_dir("/temp")?;
     
     // chroot into the directory while executing the command and also copy over the binary
     let args: Vec<_> = std::env::args().collect();
@@ -27,7 +27,7 @@ fn main() -> Result<()> {
 
     //copy binary to current working directory
     let copy_destination = "/temp".to_owned() + command.strip_prefix("/").unwrap();
-    fs::copy(command, copy_destination).context("Failed to copy")?;
+    fs::copy(command, &copy_destination).context("Failed to copy")?;
 
     let output = std::process::Command::new(command)
         .args(command_args)
