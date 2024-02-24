@@ -1,6 +1,6 @@
 use anyhow::{Context, Ok, Result};
 use std::{fs, path::Path};
-use std::os::unix::fs;
+use std::os::unix::fs::chroot;
 
 
 // Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     fs::create_dir_all("/temp/dev/null")?;
     
     //perform chroot operation
-    fs::chroot("/temp")?;
+    chroot("/temp")?;
     
     //change the current working directory
     std::env::set_current_dir("/temp");
