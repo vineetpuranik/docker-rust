@@ -1,10 +1,8 @@
 use anyhow::{Context, Ok, Result};
-use std::fmt::format;
-use std::{fs};
 use std::os::unix::fs::chroot;
 
-
-const ISOLATED_PATH: &str = "temp";
+//create an isolated path under a new folder called temp in the current directory
+const ISOLATED_PATH: &str = "./temp";
 
 // Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
 fn main() -> Result<()> {
@@ -19,7 +17,7 @@ fn main() -> Result<()> {
     fs::create_dir_all(create_dir_path)?;
     
     // create the /usr/local/bin directory in our temo directory
-    let create_bin_directory = format!("{}{}", ISOLATED_PATH, "/usr/local/bin");
+    let create_bin_directory = format!("{}{}", ISOLATED_PATH, "/usr/local/bin/");
     fs::create_dir_all(create_bin_directory)?;
     
     //capture user input for command and command args
@@ -31,7 +29,7 @@ fn main() -> Result<()> {
     println!("{:?}", command_args);
 
     //copy binary to current working directory
-    fs::copy(command, format!("{}{}", ISOLATED_PATH, command)).context("Failed to copy");
+    fs::copy(command, format!("{}{}", ISOLATED_PATH, command)).context("Failed to copy")?;
 
     //perform chroot operation
     chroot(ISOLATED_PATH)?;
