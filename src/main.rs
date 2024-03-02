@@ -1,4 +1,5 @@
 use anyhow::{Context, Ok, Result};
+use std::fmt::format;
 use std::{fs};
 use std::os::unix::fs::chroot;
 
@@ -17,6 +18,9 @@ fn main() -> Result<()> {
     let create_dir_path = format!("{}{}", ISOLATED_PATH, "/dev/null");
     fs::create_dir_all(create_dir_path)?;
     
+    // create the /usr/local/bin directory in our temo directory
+    let create_bin_directory = format!("{}{}", ISOLATED_PATH, "/usr/local/bin");
+    fs::create_dir_all(create_bin_directory)?;
     
     //capture user input for command and command args
     let args: Vec<_> = std::env::args().collect();
