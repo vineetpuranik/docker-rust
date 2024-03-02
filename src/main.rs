@@ -36,7 +36,7 @@ fn main() -> Result<()> {
     chroot(ISOLATED_PATH)?;
     
     //change the current working directory
-    std::env::set_current_dir(ISOLATED_PATH)?;
+    std::env::set_current_dir("/")?;
 
     let output = std::process::Command::new(command)
         .args(command_args)
