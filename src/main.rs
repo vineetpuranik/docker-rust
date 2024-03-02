@@ -1,5 +1,6 @@
 use anyhow::{Context, Ok, Result};
 use std::os::unix::fs::chroot;
+use std::fs;
 
 //create an isolated path under a new folder called temp in the current directory
 const ISOLATED_PATH: &str = "./temp";
