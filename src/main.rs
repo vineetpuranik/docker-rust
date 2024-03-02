@@ -3,7 +3,7 @@ use std::{fs};
 use std::os::unix::fs::chroot;
 
 
-const ISOLATED_PATH: &str = "/temp";
+const ISOLATED_PATH: &str = "temp";
 
 // Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
 fn main() -> Result<()> {
@@ -13,13 +13,12 @@ fn main() -> Result<()> {
     // Uncomment this block to pass the first stage!
 
     // create an empty temporary directory based on the isolated path
-    // create an empty dev/null directory in our isolated path
+    // in the directory create the path /dev/null 
     let create_dir_path = format!("{}{}", ISOLATED_PATH, "/dev/null");
     fs::create_dir_all(create_dir_path)?;
     
     
-    
-    // chroot into the directory while executing the command and also copy over the binary
+    //capture user input for command and command args
     let args: Vec<_> = std::env::args().collect();
     let command = &args[3];
     let command_args = &args[4..];
@@ -27,7 +26,6 @@ fn main() -> Result<()> {
     //copy binary to current working directory
     fs::copy(command, format!("{}{}", ISOLATED_PATH, command)).context("Failed to copy");
 
-    //create an empty file named null in
     //perform chroot operation
     chroot(ISOLATED_PATH)?;
     
