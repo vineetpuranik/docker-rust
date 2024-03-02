@@ -23,6 +23,9 @@ fn main() -> Result<()> {
     let command = &args[3];
     let command_args = &args[4..];
 
+    println!("{}", command);
+    println!("{:?}", command_args);
+
     //copy binary to current working directory
     fs::copy(command, format!("{}{}", ISOLATED_PATH, command)).context("Failed to copy");
 
