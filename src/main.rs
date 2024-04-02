@@ -16,7 +16,7 @@ use std::fs;
 
 
 
-//Sandboxing process
+//Sandboxing process : helps guarding against malicious actitity by restricting the spawned process's executable file access to only the files within the sandboxed process
 //Chroot
 //fs create directory
 //parse user arguments
@@ -24,6 +24,7 @@ use std::fs;
 //change working directory set_current_dir
 //spawn a child process and provide the command for the child process
 //wire up child process output and error to parent.
+//PID namespaces to ensure the spawned process is capable of viewing only itself.
 const ISOLATED_PATH: &str = "./temp";
 
 // Usage: your_docker.sh run <image> <command> <arg> <arg2> ...
@@ -55,6 +56,12 @@ fn main() -> Result<()> {
     
     //change the current working directory
     std::env::set_current_dir(ISOLATED_PATH)?;
+
+    // implement process isolation
+    unsafe {
+        #[cfg(target_os = "linux")]
+        libc::unshare(libc::CLONE_NEWPID);
+    }
 
     let output = std::process::Command::new(command)
         .args(command_args)
